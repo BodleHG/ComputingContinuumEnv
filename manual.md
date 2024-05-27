@@ -29,6 +29,22 @@
     $ New-NetFirewallRule -Name sshd -DisplayName 'OpenSSH-Server-In-TCP' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
     ```
 
+- Ubuntu
+  1. Open SSH Server 설치
+    ```bash
+    $ sudo apt update
+    $ sudo apt install openssh-server
+    ```
+  2. SSH Server 실행
+    ```bash
+    $ sudo systemctl enable ssh
+    $ sudo systemctl start ssh
+    ```
+  3. 방화벽 허용
+    ```bash
+    $ sudo ufw allow ssh
+    ```
+
 ## **Docker Desktop 설치 및 쿠버네티스 구축(Only WorkerNode)**
 1. wsl 업데이트(wsl 초기설정이 안되어있을 때)
     ```powershell
