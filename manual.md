@@ -58,7 +58,32 @@
 4. [Docker Desktop 설치](https://www.docker.com/products/docker-desktop) 설치
 5. Docker Desktop -> setting -> kubernetes 활성화
 
+## **Ubuntu Nvidia 그래픽카드 드라이버 설정**
+
+사용중인 그래픽 카드 모델, 그래픽 드라이버 확인
+```bash
+$ sudo lshw -c display
+```
+설치가능한 NVIDIA 그래픽 드라이버 목록
+```bash
+$ sudo ubuntu-drivers devices
+```
+목록 중 그래픽 드라이버 설치 (Open 버전의 경우 일부 모니터 인식이 안될 수 있음)
+```bash
+$ sudo apt install nvidia-driver-535
+```
+시스템 재부팅
+```bash
+$ sudo shutdown now
+```
+재부팅 시 무한 로딩 혹은 검은 화면이 계속된다면 BIOS 메뉴에서 **Secure Boot 해제** 후 재부팅
 
 
-
+NVIDIA 그래픽 드라이버 확인
+```bash
+$ nvidia-smi
+```
+```bash
+$ sudo lshw -c display
+```
 
