@@ -48,18 +48,16 @@
 ssh 구성이 변경되어 공개키 삭제 해야될 시(Host key verification failed)
 ```ssh-keygen -R 대상IP```
 
-## **Docker Desktop 설치 및 쿠버네티스 구축(Only WorkerNode)**
-1. wsl 업데이트(wsl 초기설정이 안되어있을 때)
-    ```powershell
-    $ wsl --update
-    ```
-2. wsl 설치
-    ```powershell
-    $ wsl --install
-    ```
-3. PC 재부팅
-4. [Docker Desktop 설치](https://www.docker.com/products/docker-desktop) 설치
-5. Docker Desktop -> setting -> kubernetes 활성화
+## **Ubuntu 노트북 대기모드 해제 (덮개 닫아도 전원 유지)**
+
+logind.conf 파일을 연 후, 24번째의 HandleLidSwitch 값을 ignore로 변경
+```bash
+$ sudo vi /etc/systemd/logind.conf
+$ systemctl restart systemd-logind
+```
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/c38a0d22-316c-46e0-8742-c48393d67205">
+
 
 ## **Ubuntu Nvidia 그래픽카드 드라이버 설정**
 
@@ -267,6 +265,18 @@ $ kubectl get node
 <img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/d7b78dc8-b5dd-40cb-a086-d56338eaf726">
 
 
+### 노드의 Role 설정
+
+참여 노드의 ROLE 변경
+```bash
+$ kubectl label node $(NodeName) node-role.kubernetes.io/$(Role)=
+# 예시
+$ kubectl label node 612odyssey1 node-role.kubernetes.io/worker=
+```
+
+
+
+
 ## **Worker Node 구성**
 발행된 control plane의 토큰을 이용하여 join
 ```bash
@@ -344,117 +354,3 @@ sudo apt-get install --reinstall ubuntu-desktop
 sudo apt-get autoremove
 sudo apt-get clean
 ```
-
-# READY 상태 된 테스트본
-Ubnutu Swap 메모리 해제
-```bash
-$ sudo swapoff -a
-```
-Ubnutu Swap 메모리 해제 *권장하지 않음*
-
-(/etc/fstab 파일 내부의 2번째 라인 맨 앞에 #을 붙이라는 명령어로, 장치에 따라 2번째 라인에 루트 파티션에 대한 내용이 있을 수도 있음. **반드시 /etc/fstab 파일 내용 확인**)
-```bash
-$ sed -i '2s/^/#/' /etc/fstab
-```
-
-스왑 메모리 비활성화 확인
-```bash
-$ free -h
-```
-
-sudo modprobe br_netfilter
-sudo su
-echo "br_netfilter" > /etc/modules-load.d/br_netfilter.conf
-exit
-
-lsmod # br_netfilter 상태 확인
-modinfo br_netfilter # netfilter 상태 확인
-
-
-cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
-net.ipv4.ip_forward = 1
-EOF
-
-sudo sysctl --system
-
-
-cd /proc/sys/net/bridge # 설정 잘 됐는지 확인
-ls -ahl
-cat bridge-nf-call-arptables
-cat bridge-nf-call-ip6tables
-cd ~
-
-컨테이너 런타임 설치
-sudo apt-get -y update
-sudo apt-get install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg
-sudo add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-
-sudo apt-get -y update
-sudo apt-get install -y containerd.io
-containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>&1
-sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
-
-sudo systemctl restart containerd
-sudo systemctl enable containerd
-
-
-IP 설정
-sudo su
-
-자신의 ip
-cat <<-'EOF' >/etc/default/kubelet
-KUBELET_EXTRA_ARGS=--node-ip=자신의ip
-EOF
-
-cat <<-'EOF' >/etc/default/kubelet
-KUBELET_EXTRA_ARGS=--node-ip=192.168.50.202
-EOF
-
-exit
-
-$ sudo apt-get update
-apt 업데이트, ca 관련 패키지 다운로드 설정
-$ sudo apt-get install -y apt-transport-https ca-certificates curl gpg
-
-$ sudo mkdir -p -m 755 /etc/apt/keyrings
-
-$ curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-
-$ echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-
-$ sudo apt-get update
-
-$ sudo apt-get install -y kubelet kubeadm kubectl
-
-sudo apt-mark hold kubelet kubeadm kubectl
-
-
-## 컨트롤 플레인 설정
-sudo kubeadm init \
---pod-network-cidr=10.244.0.0/16 \
---control-plane-endpoint=192.168.50.201 \
---apiserver-advertise-address=192.168.50.201
-
-시간이 좀 걸림
-
-$ mkdir -p $HOME/.kube
-$ sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
-$ sudo chown $(id -u):$(id -g) $HOME/.kube/config
-sudo chown -R sysailab612:sysailab612 /home/sysailab612/.kube
-
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-
-## 워커노드
-sudo kubeadm join 192.168.50.201:6443 --token nqv7wq.qofb6unn1vmlxmu1 \
-        --discovery-token-ca-cert-hash sha256:9e02209e5b997a874e48708b6e423144d0bacb43bedfcf0777b1deeb70460b3b
-
-worker node에서
-mkdir -p $HOME/.kube
-contron plane에서
-sudo scp /etc/kubernetes/admin.conf sysailab612@192.168.50.202:$HOME/.kube/config
-worker node에서
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-sudo chown -R sysailab612:sysailab612 /home/sysailab612/.kube
