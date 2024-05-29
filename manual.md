@@ -95,12 +95,17 @@ Ubnutu Swap 메모리 해제
 ```bash
 $ sudo swapoff -a
 ```
-Ubnutu Swap 메모리 해제 *권장하지 않음*
+부팅 시 Ubnutu Swap 메모리 해제
 
 (/etc/fstab 파일 내부의 2번째 라인 맨 앞에 #을 붙이라는 명령어로, 장치에 따라 2번째 라인에 루트 파티션에 대한 내용이 있을 수도 있음. **반드시 /etc/fstab 파일 내용 확인**)
 ```bash
+# 아래 코드 주석 처리
+/swapfile none swap sw 0 0
+
+# 혹은 아래 코드 실행 (권장하지 않음)
 $ sed -i '2s/^/#/' /etc/fstab
 ```
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/7b418629-c4f1-424c-be10-eed9e0a70d9e">
 
 스왑 메모리 비활성화 확인
 ```bash
