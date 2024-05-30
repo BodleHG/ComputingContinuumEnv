@@ -55,3 +55,40 @@ kubectl -n kubernetes-dashboard create token admin-user
 ```
 
 발행된 토큰을 통해 대시보드 접근
+
+
+## Grafana & Prometheus 설치
+
+helm 설치
+```bash
+
+# helm 설치
+$ wget  https://get.helm.sh/helm-v3.9.4-linux-amd64.tar.gz
+$ tar xvfz helm-v3.9.4-linux-amd64.tar.gz
+$ sudo mv linux-amd64/helm /usr/bin/
+
+# helm repo 추가
+$ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+# helm repo Update
+$ helm repo update
+```
+
+kube-prometheus-stack 다운로드
+```bash
+$ helm pull prometheus-community/kube-prometheus-stack
+# ls 명령어로 kube-prometheus-stack-xx.x.x.tgz의 버전 확인
+$ ls
+$ tar xfz kube-prometheus-stack-59.0.0.tgz
+$ cd kube-prometheus-stack/
+```
+
+게정 비밀번호 수정
+```bash
+adminPassword: sysailab@612
+```
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/c860d3cd-7408-4492-bad0-9f090d6641a9">
+
+
+
