@@ -219,7 +219,10 @@ $ sudo kubeadm init \
 --apiserver-advertise-address=192.168.50.201
 ```
 
-다음과 같은 화면 보이면, 설치가 성공한 것임
+위 명령어 실행 시 시간이 좀 걸림(여러 이미지 파일 다운로드)
+
+다음과 같은 화면 보이면, 설치가 성공한 것임.
+
 발행된 토큰 반드시 저장(노드 추가 시 필요)
 
 <img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/978d20a1-8072-4f56-9875-3161c2c1ab8d">
@@ -235,10 +238,6 @@ $ kubeadm join 192.168.50.201:6443 --token nqv7wq.qofb6unn1vmlxmu1 \
 $ kubeadm join 192.168.50.201:6443 --token nqv7wq.qofb6unn1vmlxmu1 \
         --discovery-token-ca-cert-hash sha256:9e02209e5b997a874e48708b6e423144d0bacb43bedfcf0777b1deeb70460b3b
 ```
-
-
-
-위 명령어 실행 시 시간이 좀 걸림(여러 이미지 파일 다운로드)
 
 kubectl 명령어 수행을 위한 권한 부여
 ```bash
@@ -273,8 +272,6 @@ $ kubectl label node $(NodeName) node-role.kubernetes.io/$(Role)=
 # 예시
 $ kubectl label node 612odyssey1 node-role.kubernetes.io/worker=
 ```
-
-
 
 
 ## **Worker Node 구성**
