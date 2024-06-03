@@ -90,7 +90,57 @@ adminPassword: sysailab@612
 
 <img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/c860d3cd-7408-4492-bad0-9f090d6641a9">
 
+```bash
+kubectl create namespace monitoring
+```
+
+```bash
+helm install prometheus . -n monitoring -f values.yaml
+```
+
+설치 확인
+```bash
+helm list -n monitoring
+kubectl get pod -n monitoring
+kubectl get svc -n monitoring
+```
+
+```bash
+kubectl edit service -n monitoring prometheus-grafana
+```
+
+여기서는 grafana 포트를 31001로 설정
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/e280e69a-869b-4255-a64f-adc2d93ce0c3">
 
 
+
+```bash
+kubectl edit service -n monitoring prometheus-kube-prometheus-prometheus
+```
+
+여기서는 Prometheus 포트를 30090으로 설정
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/62e6f011-27f5-42f8-a18a-41d28312dadd">
+
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/cf702069-2f26-42aa-b60c-8278d3e2197a">
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/05ac700e-31e1-4433-acd2-f2a23ab80826">
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/99703ade-7208-420c-86d9-69f266bd1c37">
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/4430cc44-2a08-42c8-adb2-6eb31ab2e78a">
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/33c09c49-e011-43d2-b86e-91c30662cdf5">
+
+https://grafana.com/grafana/dashboards/15759-kubernetes-views-nodes/
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/2c2689c9-db47-415d-b9eb-9a5e7b2c4c4d">
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/a605cef7-137e-41e0-866d-1a842cce6501">
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/a1c18ad6-8e1d-4886-866d-d5a7a5138dd1">
+
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/ac943587-6728-4163-9b1d-c82efafd15eb">
 
 
