@@ -1,0 +1,7 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: mongo-storage
+# Local Cluster에서 동작시키기 때문에 no-provisioner로 설정
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer

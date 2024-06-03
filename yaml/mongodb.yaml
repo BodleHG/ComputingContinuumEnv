@@ -1,0 +1,101 @@
+# # Ingress 설정을 위한 ConfigMap
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: tcp-services
+#   namespace: ingress-nginx
+# data:
+#   27017: "default/mongo-svc:27017"
+# # Ingress 설정 
+# ---
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: mongo-svc-vip # 서비스 명에 맞게 변경
+#   namespace: ingress-nginx
+# spec:
+#   externalTrafficPolicy: Local
+#   type: LoadBalancer
+#   ports: # 서비스에 맞게 변경
+#     - name: mongo-svc
+#       port: 27017
+#       targetPort: 27017
+#       protocol: TCP
+# ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  labels:
+    name: mongo
+spec:
+  ports:
+  - port: 27017
+    targetPort: 27017
+  clusterIP: None
+  selector:
+    role: mongo
+---
+# 데이터베이스이기 때문에 StatefulSet으로 배포
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+spec:
+  serviceName: mongo-svc
+  replicas: 3
+  selector:
+    matchLabels:
+      role: mongo
+  template:
+    metadata:
+      labels:
+        role: mongo
+        environment: test
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo
+          image: idock.daumkakao.io/luka/mirror:mongo-5.0.11
+          command:
+            - "numactl"
+            - "--interleave=all"
+            - "mongod"
+            - "--bind_ip"
+            - "0.0.0.0"
+            - "--replSet"
+            - "MainRepSet"
+            - "--auth"
+            - "--clusterAuthMode"
+            - "keyFile"
+            - "--keyFile"
+            - "/etc/secrets-volume/internal-auth-mongodb-keyfile"
+            - "--setParameter"
+            - "authenticationMechanisms=SCRAM-SHA-1"
+          resources:
+            requests:
+              cpu: 0.2
+              memory: 200Mi
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: secrets-volume
+              readOnly: true
+              mountPath: /etc/secrets-volume
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+        - name: mongo-sidecar
+          image: idock.daumkakao.io/luka/mirror:cvallance-mongo-k8s-sidecar-20220824
+      volumes:
+        - name: secrets-volume
+          secret:
+            secretName: mongo-shared-bootstrap-data
+            defaultMode: 256
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-persistent-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Gi
