@@ -4,8 +4,9 @@
 - Worker Node
   - workstation : 192.168.50.201
   - odyssey1(ubuntu) : 192.168.50.202
-  - odyssey2(ubuntu) : 192.168.50.203
-  - raspberrypi4(ubuntu) : 192.168.50.204
+  - 612notebook(ubuntu) : 192.168.50.203
+  - 612notebook2(ubuntu) : 192.168.50.204
+  <!-- - raspberrypi4(ubuntu) : 192.168.50.204 -->
   - raspberrypi3(raspbian) : 192.168.50.205
 
 ## **OpenSSH 설정**
@@ -53,7 +54,7 @@ ssh 구성이 변경되어 공개키 삭제 해야될 시(Host key verification 
 logind.conf 파일을 연 후, 24번째의 HandleLidSwitch 값을 ignore로 변경
 ```bash
 $ sudo vi /etc/systemd/logind.conf
-$ systemctl restart systemd-logind
+$ sudo systemctl restart systemd-logind
 ```
 
 <img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/c38a0d22-316c-46e0-8742-c48393d67205">
@@ -230,12 +231,12 @@ $ sudo kubeadm init \
 kubeadm 토큰 발행
 ```bash
 # 다른 control plane 추가
-$ kubeadm join 192.168.50.201:6443 --token nqv7wq.qofb6unn1vmlxmu1 \
+$ sudo kubeadm join 192.168.50.201:6443 --token nqv7wq.qofb6unn1vmlxmu1 \
         --discovery-token-ca-cert-hash sha256:9e02209e5b997a874e48708b6e423144d0bacb43bedfcf0777b1deeb70460b3b \
         --control-plane
 
 # Worker Node 추가
-$ kubeadm join 192.168.50.201:6443 --token nqv7wq.qofb6unn1vmlxmu1 \
+$ sudo kubeadm join 192.168.50.201:6443 --token nqv7wq.qofb6unn1vmlxmu1 \
         --discovery-token-ca-cert-hash sha256:9e02209e5b997a874e48708b6e423144d0bacb43bedfcf0777b1deeb70460b3b
 ```
 
