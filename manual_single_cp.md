@@ -106,6 +106,11 @@ $ sed -i '2s/^/#/' /etc/fstab
 ```
 <img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/7b418629-c4f1-424c-be10-eed9e0a70d9e">
 
+# 라즈베리파이4일 경우
+```bash
+cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1
+```
+
 스왑 메모리 비활성화 확인
 ```bash
 $ free -h
@@ -172,6 +177,14 @@ $ sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd
 $ sudo systemctl restart containerd
 $ sudo systemctl enable containerd
 ```
+
+# 라즈베리파이의 경우
+```bash
+sudo apt-get install -y docker.io
+```
+
+
+
 
 노드의 IP 설정
 ```bash
@@ -271,7 +284,9 @@ $ kubectl get node
 ```bash
 $ kubectl label node $(NodeName) node-role.kubernetes.io/$(Role)=
 # 예시
-$ kubectl label node 612odyssey1 node-role.kubernetes.io/worker=
+$ kubectl label node 612odyssey1 node-role.kubernetes.io/worker=worker
+
+
 ```
 
 
@@ -351,4 +366,17 @@ sudo apt-get full-upgrade
 sudo apt-get install --reinstall ubuntu-desktop
 sudo apt-get autoremove
 sudo apt-get clean
+```
+
+
+## 에러 대응
+error execution phase preflight: couldn't validate the identity of the API Server: could not find a JWS signature in the cluster-info ConfigMap ~ 에러
+
+```bash
+# 토큰 정보 확인
+$ kubeadm token list
+# 기존에 있던 토큰 삭제
+$ kubeadm token delete $(토큰이름)
+# 새로운 토큰 발급
+$ kubeadm token create --print-join-command
 ```

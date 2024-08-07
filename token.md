@@ -9,7 +9,13 @@ worker node join 토큰
 ```bash
 sudo kubeadm join 192.168.50.201:6443 --token nqv7wq.qofb6unn1vmlxmu1 \
         --discovery-token-ca-cert-hash sha256:9e02209e5b997a874e48708b6e423144d0bacb43bedfcf0777b1deeb70460b3b
+
+$ sudo kubeadm join 192.168.50.201:6443 --token ieiy19.uf5rurm6h18qwenn --discovery-token-ca-cert-hash sha256:9e02209e5b997a874e48708b6e423144d0bacb43bedfcf0777b1deeb70460b3b
+
 ```
+
+kubeadm join 192.168.50.201:6443 --token ieiy19.uf5rurm6h18qwenn --discovery-token-ca-cert-hash sha256:9e02209e5b997a874e48708b6e423144d0bacb43bedfcf0777b1deeb70460b3b
+
 
 쿠버네티스 대시보드 토큰
 
