@@ -216,7 +216,7 @@ $ echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkg
 
 $ sudo apt-get update
 
-$ sudo apt-get install -y kubelet kubeadm kubectl
+$ sudo apt-get install -y kubelet=1.29.5-1.1 kubeadm=1.29.5-1.1 kubectl=1.29.5-1.1
 
 $ sudo apt-mark hold kubelet kubeadm kubectl
 ```
