@@ -89,7 +89,7 @@ $ nvidia-smi
 $ sudo lshw -c display
 ```
 
-## **모든 쿠버네티스 참여 노드 설정**
+## **모든 쿠버네티스 참여 노드 설정** (Odyssey 이상 급)
 Ubnutu Swap 메모리 해제
 ```bash
 $ sudo swapoff -a
@@ -105,11 +105,6 @@ $ sudo swapoff -a
 $ sed -i '2s/^/#/' /etc/fstab
 ```
 <img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/7b418629-c4f1-424c-be10-eed9e0a70d9e">
-
-# 라즈베리파이4일 경우
-```bash
-cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1
-```
 
 스왑 메모리 비활성화 확인
 ```bash
@@ -178,14 +173,6 @@ $ sudo systemctl restart containerd
 $ sudo systemctl enable containerd
 ```
 
-# 라즈베리파이의 경우
-```bash
-sudo apt-get install -y docker.io
-```
-
-
-
-
 노드의 IP 설정
 ```bash
 $ sudo su
@@ -219,6 +206,127 @@ $ sudo apt-get update
 $ sudo apt-get install -y kubelet=1.29.5-1.1 kubeadm=1.29.5-1.1 kubectl=1.29.5-1.1
 
 $ sudo apt-mark hold kubelet kubeadm kubectl
+```
+
+## **모든 쿠버네티스 참여 노드 설정** (Raspberry Pi)
+cgroup_memory 설정
+```bash
+$ sudo vi /boot/firmware/cmdline.txt
+cgroup_enable=memory cgroup_memory=1 # 맨 앞에 추가
+```
+<img src = "https://github.com/user-attachments/assets/15c1255a-504a-4842-b2f0-db632524930e">
+
+Ubnutu Swap 메모리 해제
+```bash
+$ sudo swapoff -a
+```
+부팅 시 Ubnutu Swap 메모리 해제
+
+(/etc/fstab 파일 내부의 2번째 라인 맨 앞에 #을 붙이라는 명령어로, 장치에 따라 2번째 라인에 루트 파티션에 대한 내용이 있을 수도 있음. **반드시 /etc/fstab 파일 내용 확인** *없을 시 진행하지 않아도 됨*)
+```bash
+# 아래 코드 주석 처리
+/swapfile none swap sw 0 0
+
+# 혹은 아래 코드 실행 (권장하지 않음)
+$ sed -i '2s/^/#/' /etc/fstab
+```
+<img src = "https://github.com/BodleHG/ComputingContinuumEnv/assets/89232601/7b418629-c4f1-424c-be10-eed9e0a70d9e">
+
+스왑 메모리 비활성화 확인
+```bash
+$ free -h
+```
+
+docker 설치
+```bash
+$ sudo apt -y install curl apt-transport-https net-tools vim git curl wget software-properties-common
+$ curl -sSL https://get.docker.com | sh
+$ sudo usermod -aG docker $USER # sudo를 안쓰기 위해
+```
+
+cri-dockered 설치
+```bash
+$ VER=$(curl -s https://api.github.com/repos/Mirantis/cri-dockerd/releases/latest|grep tag_name | cut -d '"' -f 4|sed 's/v//g') # for latest
+$ echo $VER # 0.3.7
+$ wget https://github.com/Mirantis/cri-dockerd/releases/download/v${VER}/cri-dockerd-${VER}.arm64.tgz
+$ tar xvf cri-dockerd-${VER}.arm64.tgz
+$ sudo mv cri-dockerd/cri-dockerd /usr/local/bin/
+$ cri-dockerd --version # cri-dockerd 0.3.7 
+$ wget https://raw.githubusercontent.com/Mirantis/cri-dockerd/master/packaging/systemd/cri-docker.service
+$ wget https://raw.githubusercontent.com/Mirantis/cri-dockerd/master/packaging/systemd/cri-docker.socket
+$ sudo mv cri-docker.socket cri-docker.service /etc/systemd/system/
+$ sudo sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/system/cri-docker.service
+$ sudo systemctl daemon-reload
+$ sudo systemctl enable cri-docker.service
+$ sudo systemctl enable --now cri-docker.socket
+$ sudo systemctl restart docker && sudo systemctl restart cri-docker
+$ sudo systemctl status cri-docker.socket --no-pager
+$ sudo mkdir /etc/docker
+$ cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+	"exec-opts": ["native.cgroupdriver=systemd"],
+	"log-driver": "json-file",
+	"log-opts": {
+		"max-size": "100m"
+	},
+	"storage-driver": "overlay2"
+}
+EOF
+$ sudo systemctl restart docker && sudo systemctl restart cri-docker
+$ sudo docker info | grep Cgroup
+```
+
+cri-o 설치 (raspberry pi의 경우 해당 패키지를 설치하지 않으면 CNI에서 에러가 발생함)
+```bash
+$ OS_NAME=xUbuntu_22.04
+$ CRIO_VER=1.28
+$ echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/${OS_NAME}/ /"|sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+$ echo "deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/${CRIO_VER}/${OS_NAME}/ /"|sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:$CRIO_VER.list
+$ curl -L https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:$CRIO_VER/$OS_NAME/Release.key | sudo apt-key add -
+$ curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS_NAME/Release.key | sudo apt-key add -
+$ sudo apt update
+$ sudo apt -y install cri-o cri-o-runc
+$ crio version
+```
+
+kubelet, kubeadm, kubectl 설치
+```bash
+$ sudo apt-get update
+# apt 업데이트, ca 관련 패키지 다운로드 설정
+$ sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+
+$ sudo mkdir -p -m 755 /etc/apt/keyrings
+
+$ curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+$ echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+$ sudo apt-get update
+
+$ sudo apt-get install -y kubelet=1.29.5-1.1 kubeadm=1.29.5-1.1 kubectl=1.29.5-1.1
+
+$ sudo apt-mark hold kubelet kubeadm kubectl
+```
+
+iptables 설정(ipv4 포워딩)
+```bash
+$ cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
+$ sudo modprobe overlay
+$ sudo modprobe br_netfilter
+
+# 필요한 sysctl 파라미터를 설정하면, 재부팅 후에도 값이 유지된다.
+$ cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+# 재부팅하지 않고 sysctl 파라미터 적용하기
+$ sudo sysctl --system
 ```
 
 ## **Control Plane 구성**
@@ -286,17 +394,33 @@ $ kubectl label node $(NodeName) node-role.kubernetes.io/$(Role)=
 # 예시
 $ kubectl label node 612odyssey1 node-role.kubernetes.io/worker=worker
 
-
 ```
-
 
 ## **Worker Node 구성**
 발행된 control plane의 토큰을 이용하여 join
 ```bash
+$ sudo kubeadm join $(control plane IP):6443 --token $(kubeadm token) \
+        --discovery-token-ca-cert-hash sha256:$(kubeadm token hash)
 #예시
 $ sudo kubeadm join 192.168.50.201:6443 --token nqv7wq.qofb6unn1vmlxmu1 \
         --discovery-token-ca-cert-hash sha256:9e02209e5b997a874e48708b6e423144d0bacb43bedfcf0777b1deeb70460b3b
 ```
+
+<img src = "https://github.com/user-attachments/assets/f355573f-9c4a-4f29-b799-28c51c99f79f">
+
+CRI Socket이 여러개일 경우 cri socket을 지정해야 함
+```bash
+$ sudo kubeadm join $(control plane IP):6443 --token $(kubeadm token) \
+        --discovery-token-ca-cert-hash sha256:$(kubeadm token hash)
+        --cri-socket $(socket directory)
+
+$ sudo kubeadm join 192.168.50.201:6443 --token po7h7o.55ofj3ifecued98e \
+        --discovery-token-ca-cert-hash sha256:9e02209e5b997a874e48708b6e423144d0bacb43bedfcf0777b1deeb70460b3b \
+	      --cri-socket /var/run/containerd/containerd.sock
+```
+
+
+
 
 Control Plane에서 worker node join 여부 확인
 ```bash
