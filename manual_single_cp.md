@@ -464,12 +464,21 @@ sudo systemctl stop docker
 
 sudo rm -rf /var/lib/cni/
 sudo rm -rf /var/lib/kubelet/
-sudo rm -rf /run/calico   # 설치한 cni를 삭제
+sudo rm -rf /run/calico
 sudo rm -rf /etc/cni/
 sudo rm -rf /etc/kubernetes
 sudo rm -rf /root/.kube/
 sudo rm -rf /root/.k8s/
 sudo rm -rf /var/lib/etcd/
+sudo rm -rf /var/lib/cni/
+sudo rm -rf /var/lib/kubelet/*
+sudo rm -rf /var/lib/etcd
+sudo rm -rf /run/flannel
+sudo rm -rf /etc/cni
+sudo rm -rf /etc/kubernetes
+sudo rm -rf ~/.kube
+sudo rm -rf /var/run/calico
+sudo rm -rf /run/calico
 
 sudo ip link delete cni0   # 설치한 cni의 네트워크 인터페이스 삭제
 sudo ip link delete calico   # 설치한 cni의 네트워크 인터페이스 삭제
