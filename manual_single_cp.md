@@ -461,6 +461,8 @@ kubernetes 삭제
 ```bash
 sudo systemctl stop kubelet
 sudo systemctl stop docker
+sudo systemctl stop containerd
+
 
 sudo rm -rf /var/lib/cni/
 sudo rm -rf /var/lib/kubelet/
@@ -487,7 +489,8 @@ sudo apt remove --purge kubelet kubectl kubeadm
 
 sudo apt autoremove
 
-systemctl start docker
+sudo systemctl start docker
+sudo systemctl start containerd
 ```
 
 ## 우분투 공장초기화
