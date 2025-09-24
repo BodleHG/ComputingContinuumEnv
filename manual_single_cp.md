@@ -333,6 +333,7 @@ $ sudo sysctl --system
 kubeadm을 통한 클러스터 초기화, control plane role 배정 (Flannel CNI 사용)
 ```bash
 # --pod-network-cidr=10.244.0.0/16 : Flannel에서 기본적으로 권장하는 네트워크 대역 설정
+# --pod-network-cidr=192.168.0.0/16 : Calico에서 기본적으로 권장하는 네트워크 대역 설정
 # --control-plane-endpoint : control plane의 IP 주소
 # --apiserver-advertise-address : control plane의 IP 주소
 $ sudo kubeadm init \
